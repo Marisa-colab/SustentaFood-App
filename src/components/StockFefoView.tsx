@@ -49,7 +49,8 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
       unit: 'kg',
       date: new Date().toISOString().split('T')[0],
       responsible: 'Gestor de Compras',
-      reason: `Compra efetuada ao fornecedor: ${fornecedor} (${preco}€)`
+     supplier: fornecedor, 
+     reason: `Compra efetuada ao fornecedor: ${fornecedor} (${preco}€)`
     });
 
     // Limpar formulário
