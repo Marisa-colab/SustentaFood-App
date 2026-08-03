@@ -320,9 +320,11 @@ export const EntradaMercadoriaView: React.FC<Props> = ({ empresaId }) => {
               </button>
             </div>
           </form>
-          )}
         </div>
-      );
-      };
+      )}
+    </div>
+  );
+};
 
+export default EntradaMercadoriaView;
 export default EntradaMercadoriaView;
