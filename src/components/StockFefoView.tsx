@@ -122,7 +122,13 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
         </div>
       </div>
 
-      {/* 🛒 FORMULÁRIO COMPLETO DE REGISTO DE COMPRA */}
+     {/* Campo de input com a propriedade 'list' */}
+<input
+  type="text"
+  placeholder="Ex: Makro, Lactogal..."
+  value={fornecedor}
+  onChange={(e) => setFornecedor(e.target.value)}
+  list="lista-fornecedores-sugestoes"
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
           <PlusCircle className="w-4 h-4 text-emerald-600" />
