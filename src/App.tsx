@@ -13,6 +13,7 @@ import { HaccpView } from './components/HaccpView';
 import { AIPredictionsView } from './components/AIPredictionsView';
 import { ReportsView } from './components/ReportsView';
 import { AlertsView } from './components/AlertsView';
+import EntradaMercadoriaView from './components/EntradaMercadoriaView';
 
 // 🛡️ Licença e Backoffice
 import { LicenseGuard, LicenseBadge } from './components/LicenseGuard';
