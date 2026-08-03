@@ -49,8 +49,8 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
       unit: 'kg',
       date: new Date().toISOString().split('T')[0],
       responsible: 'Gestor de Compras',
-     supplier: fornecedor, 
-     reason: `Compra efetuada ao fornecedor: ${fornecedor} (${preco}€)`
+      supplier: fornecedor,
+      reason: `Compra efetuada ao fornecedor: ${fornecedor} (${preco}€)`
     });
 
     // Limpar formulário
@@ -61,10 +61,10 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
     setValidade('');
   };
 
-  // Lista única de fornecedores para filtro
+  // Lista única de fornecedores para filtro e autocompletar
   const listaFornecedores = Array.from(
     new Set(stockItems.map((item) => item.supplier).filter(Boolean))
-  );
+  ) as string[];
 
   // Ordenação FEFO (Primeiro a Caducar, Primeiro a Sair) + Filtro de Fornecedor
   const stockOrdenadoFEFO = [...stockItems]
@@ -122,13 +122,7 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
         </div>
       </div>
 
-     {/* Campo de input com a propriedade 'list' */}
-<input
-  type="text"
-  placeholder="Ex: Makro, Lactogal..."
-  value={fornecedor}
-  onChange={(e) => setFornecedor(e.target.value)}
-  list="lista-fornecedores-sugestoes"
+      {/* FORMULÁRIO DE REGISTO DE COMPRA */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
           <PlusCircle className="w-4 h-4 text-emerald-600" />
@@ -136,7 +130,7 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
         </h3>
 
         <form onSubmit={handleSubmitCompra} className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {/* 1. Fornecedor */}
+          {/* 1. Fornecedor com Datalist Integrado */}
           <div>
             <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1">
               <Building2 className="w-3.5 h-3.5 text-slate-400" /> Fornecedor *
@@ -146,9 +140,16 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
               placeholder="Ex: Lactogal / Parmalat"
               value={fornecedor}
               onChange={(e) => setFornecedor(e.target.value)}
+              list="lista-fornecedores-sugestoes"
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               required
             />
+            {/* Lista com sugestões dos fornecedores anteriores */}
+            <datalist id="lista-fornecedores-sugestoes">
+              {listaFornecedores.map((forn, idx) => (
+                <option key={idx} value={forn} />
+              ))}
+            </datalist>
           </div>
 
           {/* 2. Produto */}
