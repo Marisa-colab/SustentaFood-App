@@ -1,5 +1,5 @@
 import React from 'react';
-import { LicenseInfo, LicenseStatus } from '../tipos'; // Ajusta o caminho se o teu ficheiro for 'types'
+import { LicenseInfo, LicenseStatus } from '../types'; // Ajusta o caminho se o teu ficheiro for 'types'
 import { ShieldCheck, ShieldAlert, Lock, Calendar, PhoneCall } from 'lucide-react';
 
 interface LicenseGuardProps {
@@ -38,7 +38,7 @@ export function LicenseGuard({ license, children }: LicenseGuardProps) {
 
           <h2 className="text-2xl font-bold text-white mb-2">Acesso Suspenso</h2>
           <p className="text-slate-400 text-sm mb-6">
-            A subscrição do <span className="font-semibold text-emerald-400">{license.clientName}</span> {!license.isActive ? 'foi desativada pelo administrador' : `terminou a ${license.endDate}`}.
+            A subscrição do <span className="font-semibold text-emerald-400">{license.clientName}</span> {!license.isActive ? 'foi desativada pelo administrador' : `terminou a ${license.endDate}[...]`}
           </p>
 
           <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700/50 mb-6 text-left space-y-2 text-xs text-slate-300">
