@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
-import { Header } from './components/Header';
-import { DashboardView } from './components/DashboardView';
-import { WasteLogView } from './components/WasteLogView';
-import { WasteLogModal } from './components/WasteLogModal';
-import { EconomicAnalysisView } from './components/EconomicAnalysisView';
-import { StockFefoView } from './components/StockFefoView';
-import { DonationView } from './components/DonationView';
-import { ValorizationView } from './components/ValorizationView';
-import { HaccpView } from './components/HaccpView';
-import { AIPredictionsView } from './components/AIPredictionsView';
-import { ReportsView } from './components/ReportsView';
-import { AlertsView } from './components/AlertsView';
+// ⚠️ ATENÇÃO AOS CAMINHOS: Usa './componentes/' e './tipos'
+import { Header } from './componentes/Header';
+import { DashboardView } from './componentes/DashboardView';
+import { WasteLogView } from './componentes/WasteLogView';
+import { WasteLogModal } from './componentes/WasteLogModal';
+import { EconomicAnalysisView } from './componentes/EconomicAnalysisView';
+import { StockFefoView } from './componentes/StockFefoView';
+import { DonationView } from './componentes/DonationView';
+import { ValorizationView } from './componentes/ValorizationView';
+import { HaccpView } from './componentes/HaccpView';
+import { AIPredictionsView } from './componentes/AIPredictionsView';
+import { ReportsView } from './componentes/ReportsView';
+import { AlertsView } from './componentes/AlertsView';
 
-// 🛡️ Novos Componentes para Gestão de Licença e Backoffice
-import { LicenseGuard, LicenseBadge } from './components/LicenseGuard';
-import { AdminBackofficeView } from './components/AdminBackofficeView';
+// 🛡️ Componentes de Licença e Backoffice
+import { LicenseGuard, LicenseBadge } from './componentes/LicenseGuard';
+import { AdminBackofficeView } from './componentes/AdminBackofficeView';
 
+// 📄 Tipos
 import {
   WasteLog,
   StockItem,
@@ -26,8 +27,8 @@ import {
   AlertItem,
   SummaryMetrics,
   WasteCategory,
-  LicenseInfo // Tipo da Licença
-} from './types';
+  LicenseInfo
+} from './tipos';
 
 import {
   initialWasteLogs,
