@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from './lib/supabaseClient';
+import { LoginView } from './components/LoginView';
+
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
 import { WasteLogView } from './components/WasteLogView';
@@ -41,6 +44,10 @@ import {
 } from './mockData';
 
 export default function App() {
+  // 🔑 Estado da Sessão Supabase
+  const [session, setSession] = useState<any>(null);
+  const [loadingSession, setLoadingSession] = useState<boolean>(true);
+
   const [activeTab, setActiveTab] = useState<string>('dashboard');
 
   // 🔑 Estado da Licença do Cliente e Modo Vendedor (Super Admin)
@@ -71,6 +78,21 @@ export default function App() {
   // Modals & Prefills
   const [isNewWasteModalOpen, setIsNewWasteModalOpen] = useState(false);
   const [prefillDonationItem, setPrefillDonationItem] = useState<{ name: string; category: WasteCategory; quantity: number } | null>(null);
+
+  // 🔄 Gestão de Sessão do Supabase
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoadingSession(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoadingSession(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Today Date
   const todayStr = new Date().toISOString().split('T')[0];
@@ -166,22 +188,54 @@ export default function App() {
 
   const unreadAlertCount = alerts.filter((a) => !a.read).length;
 
+  // 1️⃣ Ecrã de carregamento inicial de sessão
+  if (loadingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
+        <p className="animate-pulse font-medium text-emerald-400">A validar sessão no SustentaFood...</p>
+      </div>
+    );
+  }
+
+  // 2️⃣ Se NÃO houver utilizador autenticado, renderiza a vista de Login
+  if (!session) {
+    return <LoginView />;
+  }
+
+  // 3️⃣ Se ESTIVER autenticado, renderiza toda a aplicação
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
       
-      {/* 🔝 Barra Superior Global: Badge da Licença + Alternador para o Backoffice */}
-      <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex justify-between items-center text-xs text-slate-400">
+      {/* 🔝 Barra Superior Global: Sessão + Badge da Licença + Alternador para o Backoffice */}
+      <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex flex-wrap justify-between items-center text-xs text-slate-400 gap-2">
         <div className="flex items-center gap-3">
           <span className="font-bold text-emerald-400 tracking-wide">SustentaFood</span>
           <span className="text-slate-700">|</span>
           <LicenseBadge license={license} />
         </div>
-        <button
-          onClick={() => setIsSuperAdmin(!isSuperAdmin)}
-          className="px-3 py-1 rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition font-medium flex items-center gap-1.5"
-        >
-          {isSuperAdmin ? '← Voltar à Aplicação Cliente' : '⚙️ Backoffice Vendedor'}
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* Email do Utilizador Autenticado */}
+          <span className="text-slate-300 font-mono hidden sm:inline">{session.user.email}</span>
+          
+          {/* Botão de Terminar Sessão */}
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="px-2.5 py-1 rounded border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 transition font-medium text-xs"
+          >
+            Sair
+          </button>
+
+          <span className="text-slate-700">|</span>
+
+          {/* Alternador Backoffice */}
+          <button
+            onClick={() => setIsSuperAdmin(!isSuperAdmin)}
+            className="px-3 py-1 rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition font-medium flex items-center gap-1.5"
+          >
+            {isSuperAdmin ? '← Voltar à Aplicação Cliente' : '⚙️ Backoffice Vendedor'}
+          </button>
+        </div>
       </div>
 
       {/* ⚙️ Se o modo Super Admin estiver ativo, mostra o Backoffice diretamente */}
