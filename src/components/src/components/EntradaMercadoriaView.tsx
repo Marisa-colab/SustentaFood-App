@@ -327,4 +327,3 @@ export const EntradaMercadoriaView: React.FC<Props> = ({ empresaId }) => {
 };
 
 export default EntradaMercadoriaView;
-export default EntradaMercadoriaView;
