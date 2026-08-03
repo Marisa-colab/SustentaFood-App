@@ -12,6 +12,10 @@ import { AIPredictionsView } from './components/AIPredictionsView';
 import { ReportsView } from './components/ReportsView';
 import { AlertsView } from './components/AlertsView';
 
+// 🛡️ Novos Componentes para Gestão de Licença e Backoffice
+import { LicenseGuard, LicenseBadge } from './components/LicenseGuard';
+import { AdminBackofficeView } from './components/AdminBackofficeView';
+
 import {
   WasteLog,
   StockItem,
@@ -21,7 +25,8 @@ import {
   HaccpLog,
   AlertItem,
   SummaryMetrics,
-  WasteCategory
+  WasteCategory,
+  LicenseInfo // Tipo da Licença
 } from './types';
 
 import {
@@ -36,6 +41,18 @@ import {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+
+  // 🔑 Estado da Licença do Cliente e Modo Vendedor (Super Admin)
+  const [license, setLicense] = useState<LicenseInfo>({
+    clientName: 'Restaurante Sustenta',
+    startDate: '2026-01-01',
+    endDate: '2026-12-31',
+    planType: 'Enterprise',
+    licenseKey: 'SUSTENTA-2026-PRO',
+    isActive: true,
+  });
+
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
 
   // Core Application Data State
   const [wasteLogs, setWasteLogs] = useState<WasteLog[]>(initialWasteLogs);
@@ -82,7 +99,11 @@ export default function App() {
     currentReductionPercent: 18.5
   };
 
-  // Handlers for Adding & Deleting Data
+  // Handlers
+  const handleUpdateLicense = (updatedLicense: LicenseInfo) => {
+    setLicense(updatedLicense);
+  };
+
   const handleAddWasteLog = (newLogData: Omit<WasteLog, 'id'>) => {
     const newId = `LOG-${1000 + wasteLogs.length + 1}`;
     const newLog: WasteLog = { id: newId, ...newLogData };
@@ -146,105 +167,134 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-      {/* App Navigation Header */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        unreadAlertCount={unreadAlertCount}
-        onOpenNewWasteModal={() => setIsNewWasteModalOpen(true)}
-      />
+      
+      {/* 🔝 Barra Superior Global: Badge da Licença + Alternador para o Backoffice */}
+      <div className="bg-slate-900 border-b border-slate-800 px-4 py-2 flex justify-between items-center text-xs text-slate-400">
+        <div className="flex items-center gap-3">
+          <span className="font-bold text-emerald-400 tracking-wide">SustentaFood</span>
+          <span className="text-slate-700">|</span>
+          <LicenseBadge license={license} />
+        </div>
+        <button
+          onClick={() => setIsSuperAdmin(!isSuperAdmin)}
+          className="px-3 py-1 rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition font-medium flex items-center gap-1.5"
+        >
+          {isSuperAdmin ? '← Voltar à Aplicação Cliente' : '⚙️ Backoffice Vendedor'}
+        </button>
+      </div>
 
-      {/* View Content Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {activeTab === 'dashboard' && (
-          <DashboardView
-            wasteLogs={wasteLogs}
-            metrics={summaryMetrics}
-            alerts={alerts}
-            highlightPrediction={highlightPrediction}
+      {/* ⚙️ Se o modo Super Admin estiver ativo, mostra o Backoffice diretamente */}
+      {isSuperAdmin ? (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <AdminBackofficeView
+            licenses={[license]}
+            onUpdateLicense={handleUpdateLicense}
+          />
+        </main>
+      ) : (
+        /* 🔒 Proteção de Licença: Se a licença expirar/for revogada, bloqueia o ecrã do cliente */
+        <LicenseGuard license={license}>
+          {/* App Navigation Header */}
+          <Header
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            unreadAlertCount={unreadAlertCount}
             onOpenNewWasteModal={() => setIsNewWasteModalOpen(true)}
-            setActiveTab={setActiveTab}
           />
-        )}
 
-        {activeTab === 'waste_logs' && (
-          <WasteLogView
-            logs={wasteLogs}
-            onOpenNewModal={() => setIsNewWasteModalOpen(true)}
-            onDeleteLog={handleDeleteWasteLog}
+          {/* View Content Body */}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+            {activeTab === 'dashboard' && (
+              <DashboardView
+                wasteLogs={wasteLogs}
+                metrics={summaryMetrics}
+                alerts={alerts}
+                highlightPrediction={highlightPrediction}
+                onOpenNewWasteModal={() => setIsNewWasteModalOpen(true)}
+                setActiveTab={setActiveTab}
+              />
+            )}
+
+            {activeTab === 'waste_logs' && (
+              <WasteLogView
+                logs={wasteLogs}
+                onOpenNewModal={() => setIsNewWasteModalOpen(true)}
+                onDeleteLog={handleDeleteWasteLog}
+              />
+            )}
+
+            {activeTab === 'economic' && (
+              <EconomicAnalysisView
+                metrics={summaryMetrics}
+                wasteLogs={wasteLogs}
+              />
+            )}
+
+            {activeTab === 'stock_fefo' && (
+              <StockFefoView
+                stockItems={stockItems}
+                stockMovements={stockMovements}
+                onAddMovement={handleAddStockMovement}
+                onOpenDonationModalWithItem={handleOpenDonationFromStock}
+              />
+            )}
+
+            {activeTab === 'donations' && (
+              <DonationView
+                donations={donations}
+                onAddDonation={handleAddDonation}
+                prefillItem={prefillDonationItem}
+              />
+            )}
+
+            {activeTab === 'valorization' && (
+              <ValorizationView
+                valorizationLogs={valorizationLogs}
+                onAddValorizationLog={handleAddValorizationLog}
+              />
+            )}
+
+            {activeTab === 'haccp' && (
+              <HaccpView
+                haccpLogs={haccpLogs}
+                onAddHaccpLog={handleAddHaccpLog}
+              />
+            )}
+
+            {activeTab === 'ai_forecast' && (
+              <AIPredictionsView
+                wasteLogs={wasteLogs}
+                stockItems={stockItems}
+                highlightPrediction={highlightPrediction}
+                setHighlightPrediction={setHighlightPrediction}
+              />
+            )}
+
+            {activeTab === 'reports' && (
+              <ReportsView
+                metrics={summaryMetrics}
+                wasteLogs={wasteLogs}
+              />
+            )}
+
+            {activeTab === 'alerts' && (
+              <AlertsView
+                alerts={alerts}
+                onMarkAsRead={handleMarkAlertAsRead}
+                onClearAll={handleClearAllAlerts}
+                setActiveTab={setActiveTab}
+              />
+            )}
+          </main>
+
+          {/* Global New Waste Log Modal */}
+          <WasteLogModal
+            isOpen={isNewWasteModalOpen}
+            onClose={() => setIsNewWasteModalOpen(false)}
+            onAddWasteLog={handleAddWasteLog}
           />
-        )}
-
-        {activeTab === 'economic' && (
-          <EconomicAnalysisView
-            metrics={summaryMetrics}
-            wasteLogs={wasteLogs}
-          />
-        )}
-
-        {activeTab === 'stock_fefo' && (
-          <StockFefoView
-            stockItems={stockItems}
-            stockMovements={stockMovements}
-            onAddMovement={handleAddStockMovement}
-            onOpenDonationModalWithItem={handleOpenDonationFromStock}
-          />
-        )}
-
-        {activeTab === 'donations' && (
-          <DonationView
-            donations={donations}
-            onAddDonation={handleAddDonation}
-            prefillItem={prefillDonationItem}
-          />
-        )}
-
-        {activeTab === 'valorization' && (
-          <ValorizationView
-            valorizationLogs={valorizationLogs}
-            onAddValorizationLog={handleAddValorizationLog}
-          />
-        )}
-
-        {activeTab === 'haccp' && (
-          <HaccpView
-            haccpLogs={haccpLogs}
-            onAddHaccpLog={handleAddHaccpLog}
-          />
-        )}
-
-        {activeTab === 'ai_forecast' && (
-          <AIPredictionsView
-            wasteLogs={wasteLogs}
-            stockItems={stockItems}
-            highlightPrediction={highlightPrediction}
-            setHighlightPrediction={setHighlightPrediction}
-          />
-        )}
-
-        {activeTab === 'reports' && (
-          <ReportsView
-            metrics={summaryMetrics}
-            wasteLogs={wasteLogs}
-          />
-        )}
-
-        {activeTab === 'alerts' && (
-          <AlertsView
-            alerts={alerts}
-            onMarkAsRead={handleMarkAlertAsRead}
-            onClearAll={handleClearAllAlerts}
-            setActiveTab={setActiveTab}
-          />
-        )}
-      </main>
-
-      {/* Global New Waste Log Modal */}
-      <WasteLogModal
-        isOpen={isNewWasteModalOpen}
-        onClose={() => setIsNewWasteModalOpen(false)}
-        onAddWasteLog={handleAddWasteLog}
-      />
+        </LicenseGuard>
+      )}
     </div>
   );
 }
