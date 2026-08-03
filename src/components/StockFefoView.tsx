@@ -26,19 +26,23 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
   onAddMovement,
   onOpenDonationModalWithItem
 }) => {
-  // Estado para o Formulário de Nova Compra / Entrada de Stock
+  // Estado para o Formulário de Nova Compra
   const [fornecedor, setFornecedor] = useState('');
   const [produto, setProduto] = useState('');
   const [quantidade, setQuantidade] = useState<number | ''>('');
   const [preco, setPreco] = useState<number | ''>('');
   const [validade, setValidade] = useState('');
-  const [categoria, setCategoria] = useState<string>('Outros');
   const [filtroFornecedor, setFiltroFornecedor] = useState<string>('todos');
 
   // Submissão de Compra
   const handleSubmitCompra = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fornecedor || !produto || !quantidade || !preco || !validade) return;
+
+    // Validação com alerta para não falhar em silêncio
+    if (!fornecedor.trim() || !produto.trim() || !quantidade || !preco || !validade) {
+      alert('Por favor, preencha todos os campos obrigatórios (*).');
+      return;
+    }
 
     // Regista o movimento de entrada
     onAddMovement({
@@ -49,8 +53,8 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
       unit: 'kg',
       date: new Date().toISOString().split('T')[0],
       responsible: 'Gestor de Compras',
-      supplier: fornecedor,
-      reason: `Compra efetuada ao fornecedor: ${fornecedor} (${preco}€)`
+      supplier: fornecedor.trim(),
+      reason: `Compra efetuada ao fornecedor: ${fornecedor.trim()} (${preco}€)`
     });
 
     // Limpar formulário
@@ -61,7 +65,7 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
     setValidade('');
   };
 
-  // Lista única de fornecedores para filtro e autocompletar
+  // Lista única de fornecedores para o filtro e sugestões
   const listaFornecedores = Array.from(
     new Set(stockItems.map((item) => item.supplier).filter(Boolean))
   ) as string[];
@@ -78,7 +82,6 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
       return dataA - dataB;
     });
 
-  // Cálculo de dias até caducar
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
@@ -91,7 +94,7 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* 🏷️ CABEÇALHO DA ABA */}
+      {/* 🏷️ CABEÇALHO */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -103,10 +106,10 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
           </p>
         </div>
 
-        {/* Filtro por Fornecedor */}
+        {/* Filtro por Fornecedor (CORRIGIDO: "Todos os Fornecedores") */}
         <div className="flex items-center gap-2">
           <Truck className="w-4 h-4 text-slate-500" />
-          <span className="text-xs font-medium text-slate-600">Filtrar por Fornecedor:</span>
+          <span className="text-xs font-medium text-slate-600">Filtrar por:</span>
           <select
             value={filtroFornecedor}
             onChange={(e) => setFiltroFornecedor(e.target.value)}
@@ -122,15 +125,15 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
         </div>
       </div>
 
-      {/* FORMULÁRIO DE REGISTO DE COMPRA */}
+      {/* FORMULÁRIO DE COMPRA */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
           <PlusCircle className="w-4 h-4 text-emerald-600" />
-          Registar Nova Compra / Entrada de Fornecedor
+          Cadastrar Nova Compra / Entrada de Fornecedor
         </h3>
 
         <form onSubmit={handleSubmitCompra} className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {/* 1. Fornecedor com Datalist Integrado */}
+          {/* 1. Fornecedor (CORRIGIDO: Etiqueta "Fornecedor *" reposta) */}
           <div>
             <label className="text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1">
               <Building2 className="w-3.5 h-3.5 text-slate-400" /> Fornecedor *
@@ -144,7 +147,6 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               required
             />
-            {/* Lista com sugestões dos fornecedores anteriores */}
             <datalist id="lista-fornecedores-sugestoes">
               {listaFornecedores.map((forn, idx) => (
                 <option key={idx} value={forn} />
@@ -215,7 +217,7 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
             />
           </div>
 
-          {/* Botão de Gravação */}
+          {/* Botão de Submissão */}
           <div className="md:col-span-3 lg:col-span-5 flex justify-end mt-2">
             <button
               type="submit"
@@ -227,19 +229,12 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
         </form>
       </div>
 
-      {/* 📦 TABELA DE STOCK COM ORDENAÇÃO FEFO E VISUALIZAÇÃO DE FORNECEDOR */}
+      {/* 📦 TABELA STOCK */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-emerald-600" />
-              Inventário por Validade (Ordenação FEFO)
-            </h3>
-            <p className="text-xs text-slate-500">
-              Produtos com validade mais curta aparecem primeiro para rápida rotação de stock.
-            </p>
-          </div>
-        </div>
+        <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <Truck className="w-4 h-4 text-emerald-600" />
+          Inventário por Validade (Ordenação FEFO)
+        </h3>
 
         {stockOrdenadoFEFO.length === 0 ? (
           <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
