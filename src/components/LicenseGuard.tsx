@@ -7,23 +7,35 @@ interface LicenseGuardProps {
   children: React.ReactNode;
 }
 
+function safeParseDate(s?: string | null) {
+  if (!s) return null;
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
 export function LicenseGuard({ license, children }: LicenseGuardProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const endDate = new Date(license.endDate);
-  endDate.setHours(23, 59, 59, 999);
+  const endDate = safeParseDate(license.endDate);
+  let daysRemaining = Infinity;
 
-  // Dias restantes
-  const diffTime = endDate.getTime() - today.getTime();
-  const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (endDate) {
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    const diffTime = end.getTime() - today.getTime();
+    daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
 
   // Determinar Estado (Bloqueia se caducou OU se foi desativado manualmente)
   let status: LicenseStatus = 'active';
 
-  if (!license.isActive || daysRemaining <= 0) {
+  if (!license.isActive) {
     status = 'expired';
-  } else if (daysRemaining <= 7) {
+  } else if (endDate && daysRemaining <= 0) {
+    status = 'expired';
+  } else if (endDate && daysRemaining <= 7) {
     status = 'expiring_soon';
   }
 
@@ -38,7 +50,7 @@ export function LicenseGuard({ license, children }: LicenseGuardProps) {
 
           <h2 className="text-2xl font-bold text-white mb-2">Acesso Suspenso</h2>
           <p className="text-slate-400 text-sm mb-6">
-            A subscrição do <span className="font-semibold text-emerald-400">{license.clientName}</span> {!license.isActive ? 'foi desativada pelo administrador' : `terminou a ${license.endDate}[...]`}
+            A subscrição do <span className="font-semibold text-emerald-400">{license.clientName}</span> {!license.isActive ? 'foi desativada pelo administrador' : endDate ? `terminou a ${license.endDate}` : 'não tem uma data de validade válida'}.
           </p>
 
           <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700/50 mb-6 text-left space-y-2 text-xs text-slate-300">
@@ -83,11 +95,17 @@ export function LicenseGuard({ license, children }: LicenseGuardProps) {
 export function LicenseBadge({ license }: { license: LicenseInfo }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const endDate = new Date(license.endDate);
-  const diffTime = endDate.getTime() - today.getTime();
-  const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const endDate = safeParseDate(license.endDate);
+  let daysRemaining = Infinity;
 
-  const isExpiringSoon = daysRemaining <= 7;
+  if (endDate) {
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    const diffTime = end.getTime() - today.getTime();
+    daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  const isExpiringSoon = typeof daysRemaining === 'number' && daysRemaining <= 7;
 
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
@@ -104,7 +122,7 @@ export function LicenseBadge({ license }: { license: LicenseInfo }) {
       <span className="opacity-40">|</span>
       <span className="flex items-center gap-1 font-mono">
         <Calendar className="w-3 h-3 opacity-70" />
-        {daysRemaining > 0 ? `${daysRemaining} dias restantes` : 'Expira hoje'} ({license.endDate})
+        {daysRemaining !== Infinity ? (daysRemaining > 0 ? `${daysRemaining} dias restantes` : 'Expira hoje') : 'Sem data'} ({license.endDate ?? '—'})
       </span>
     </div>
   );
