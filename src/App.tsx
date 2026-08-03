@@ -43,7 +43,7 @@ import {
   initialAlerts
 } from './mockData';
 
-export default function App() {
+export function App() {
   // 🔑 Estado da Sessão Supabase
   const [session, setSession] = useState<any>(null);
   const [loadingSession, setLoadingSession] = useState<boolean>(true);
@@ -216,7 +216,7 @@ export default function App() {
 
         <div className="flex items-center gap-3">
           {/* Email do Utilizador Autenticado */}
-          <span className="text-slate-300 font-mono hidden sm:inline">{session.user.email}</span>
+          <span className="text-slate-300 font-mono hidden sm:inline">{session?.user?.email}</span>
           
           {/* Botão de Terminar Sessão */}
           <button
@@ -353,3 +353,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
