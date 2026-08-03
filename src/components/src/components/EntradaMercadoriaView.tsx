@@ -16,6 +16,7 @@ interface Props {
   empresaId?: string;
 }
 
+export default EntradaMercadoriaView;
 export const EntradaMercadoriaView: React.FC<Props> = ({ empresaId }) => {
   const [mode, setMode] = useState<'manual' | 'import'>('import');
   
