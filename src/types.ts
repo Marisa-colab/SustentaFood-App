@@ -10,7 +10,6 @@ export interface LicenseInfo {
   status?: string;
   planType?: 'Restauração' | 'Supermercado' | 'Enterprise' | string;
   licenseType?: string;
-  licenseKey?: string;
   isActive: boolean;
 }
 
