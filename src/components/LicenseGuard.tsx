@@ -1,33 +1,33 @@
 import React from 'react';
-import { LicenseInfo, LicenseStatus } from '../types';
+import { LicenseInfo, LicenseStatus } from '../tipos'; // Ajusta o caminho se o teu ficheiro for 'types'
 import { ShieldCheck, ShieldAlert, Lock, Calendar, PhoneCall } from 'lucide-react';
 
-interface Props {
+interface LicenseGuardProps {
   license: LicenseInfo;
   children: React.ReactNode;
 }
 
-export function LicenseGuard({ license, children }: Props) {
+export function LicenseGuard({ license, children }: LicenseGuardProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const startDate = new Date(license.startDate);
   const endDate = new Date(license.endDate);
   endDate.setHours(23, 59, 59, 999);
 
-  // Días restantes
+  // Dias restantes
   const diffTime = endDate.getTime() - today.getTime();
   const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  // Determinar Estado
+  // Determinar Estado (Bloqueia se caducou OU se foi desativado manualmente)
   let status: LicenseStatus = 'active';
-  if (daysRemaining <= 0) {
+
+  if (!license.isActive || daysRemaining <= 0) {
     status = 'expired';
   } else if (daysRemaining <= 7) {
     status = 'expiring_soon';
   }
 
-  // 🔴 ECRÃ DE BLOQUEIO (Se a licença tiver expirado)
+  // 🔴 ECRÃ DE BLOQUEIO (Se a licença tiver expirado ou sido revogada)
   if (status === 'expired') {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
@@ -36,9 +36,9 @@ export function LicenseGuard({ license, children }: Props) {
             <Lock className="w-8 h-8" />
           </div>
 
-          <h2 className="text-2xl font-bold text-white mb-2">Licença Expirada</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">Acesso Suspenso</h2>
           <p className="text-slate-400 text-sm mb-6">
-            A subscrição do <span className="font-semibold text-emerald-400">{license.clientName}</span> terminou a <span className="text-white font-medium">{license.endDate}</span>.
+            A subscrição do <span className="font-semibold text-emerald-400">{license.clientName}</span> {!license.isActive ? 'foi desativada pelo administrador' : `terminou a ${license.endDate}`}.
           </p>
 
           <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700/50 mb-6 text-left space-y-2 text-xs text-slate-300">
@@ -46,9 +46,17 @@ export function LicenseGuard({ license, children }: Props) {
               <span className="text-slate-500">Plano:</span>
               <span className="font-medium text-white">{license.planType}</span>
             </div>
+            {license.licenseKey && (
+              <div className="flex justify-between">
+                <span className="text-slate-500">Chave da Licença:</span>
+                <span className="font-mono text-emerald-400">{license.licenseKey}</span>
+              </div>
+            )}
             <div className="flex justify-between">
-              <span className="text-slate-500">Chave da Licença:</span>
-              <span className="font-mono text-emerald-400">{license.licenseKey}</span>
+              <span className="text-slate-500">Estado:</span>
+              <span className="font-semibold text-red-400">
+                {!license.isActive ? 'Revogado Manualmente' : 'Expirado'}
+              </span>
             </div>
           </div>
 
@@ -84,8 +92,8 @@ export function LicenseBadge({ license }: { license: LicenseInfo }) {
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
       isExpiringSoon 
-        ? 'bg-amber-500/10 border-amber-500/30 text-amber-600' 
-        : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'
+        ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' 
+        : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
     }`}>
       {isExpiringSoon ? (
         <ShieldAlert className="w-4 h-4 text-amber-500" />
@@ -96,7 +104,7 @@ export function LicenseBadge({ license }: { license: LicenseInfo }) {
       <span className="opacity-40">|</span>
       <span className="flex items-center gap-1 font-mono">
         <Calendar className="w-3 h-3 opacity-70" />
-        {daysRemaining} dias restantes ({license.endDate})
+        {daysRemaining > 0 ? `${daysRemaining} dias restantes` : 'Expira hoje'} ({license.endDate})
       </span>
     </div>
   );
