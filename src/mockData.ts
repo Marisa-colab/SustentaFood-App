@@ -6,7 +6,8 @@ import {
   ValorizationLog,
   HaccpLog,
   AlertItem,
-  AIInsight
+  AIInsight,
+  LicenseInfo
 } from './types';
 
 // Category CO2e emission factors (kg CO2e per kg food waste)
@@ -21,21 +22,19 @@ export const CO2_FACTORS: Record<string, number> = {
   'Outros': 2.0
 };
 
-// Initial Waste Logs (Recent history)
-export const initialWasteLogs: WasteLog[] = [
-  {
-import { WasteLog, StockItem, LicenseInfo } from './types';
-
-// 🔑 Dados de teste para a Licença
+// Dados de teste para a Licença
 export const initialLicense: LicenseInfo = {
   clientName: 'SustentaFood Demo',
   licenseKey: 'SF-2026-DEMO-99',
-  startDate: '2026-08-01',
-  endDate: '2026-08-31',
-  planType: 'Restauração'
+  startDate: '2026-01-01',
+  endDate: '2026-12-31',
+  validUntil: '2026-12-31',
+  status: 'ACTIVE',
+  planType: 'Restauração',
+  maxUsers: 10
 };
 
-// 📦 Registos de Desperdício de exemplo com Fornecedor e PVP
+// Registos de Desperdício de exemplo (Histórico recente)
 export const initialWasteLogs: WasteLog[] = [
   {
     id: 'LOG-001',
@@ -44,9 +43,9 @@ export const initialWasteLogs: WasteLog[] = [
     type: 'Produtos fora de prazo',
     quantity: 5,
     unit: 'kg',
-    supplier: 'Lugodef',              // ➕ Fornecedor
-    costPerUnit: 12.50,              // ➕ Preço de Custo (€/kg)
-    salePricePerUnit: 22.00,          // ➕ PVP (€/kg)
+    supplier: 'Lugodef',
+    costPerUnit: 12.50,
+    salePricePerUnit: 22.00,
     totalCost: 62.50,
     totalPotentialRevenue: 110.00,
     date: '2026-08-02',
@@ -54,9 +53,7 @@ export const initialWasteLogs: WasteLog[] = [
     location: 'Armazém / Câmara Fria',
     responsible: 'João Silva',
     co2eKg: 14.2
-  }
-];
-
+  },
   {
     id: 'LOG-1002',
     item: 'Arroz de Marisco Confecionado',
@@ -213,7 +210,7 @@ export const initialStockItems: StockItem[] = [
     quantity: 45,
     unit: 'kg',
     batchNumber: 'LOTE-2026-0801A',
-    expiryDate: '2026-08-03', // 2 days away
+    expiryDate: '2026-08-03',
     costPerUnit: 7.20,
     storageType: 'Refrigerado',
     minStockThreshold: 15,
@@ -228,7 +225,7 @@ export const initialStockItems: StockItem[] = [
     quantity: 28,
     unit: 'L',
     batchNumber: 'LOTE-2026-0722',
-    expiryDate: '2026-08-04', // 3 days away
+    expiryDate: '2026-08-04',
     costPerUnit: 3.10,
     storageType: 'Refrigerado',
     minStockThreshold: 10,
@@ -243,7 +240,7 @@ export const initialStockItems: StockItem[] = [
     quantity: 60,
     unit: 'kg',
     batchNumber: 'LOTE-2026-0715',
-    expiryDate: '2026-08-02', // 1 day away
+    expiryDate: '2026-08-02',
     costPerUnit: 11.50,
     storageType: 'Refrigerado',
     minStockThreshold: 20,

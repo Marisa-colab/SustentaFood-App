@@ -1,6 +1,9 @@
 import React from 'react';
 import {
   Leaf,
+  Sparkles,
+  Bell,
+  PlusCircle,
   LayoutDashboard,
   ClipboardList,
   TrendingDown,
@@ -8,45 +11,25 @@ import {
   HeartHandshake,
   Recycle,
   ShieldAlert,
-  FileSpreadsheet,
-  Bell,
-  Sparkles,
-  PlusCircle
+  FileSpreadsheet
 } from 'lucide-react';
-
-import { LicenseBadge } from './LicenseGuard';
 import { LicenseInfo } from '../types';
-// Garante que o Header recebe a prop 'license'
-interface HeaderProps {
-  license?: LicenseInfo;
-  // ... outras props que já tenhas
-}
-
-export function Header({ license }: HeaderProps) {
-  return (
-    <header className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <h1 className="text-xl font-bold text-emerald-400">SustentaFood</h1>
-      </div>
-
-      {/* 🏷️ AQUI APARECE A LICENÇA NO TOPO */}
-      {license && <LicenseBadge license={license} />}
-    </header>
-  );
-}
+import { LicenseBadge } from './LicenseGuard';
 
 interface HeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   unreadAlertCount: number;
   onOpenNewWasteModal: () => void;
+  license?: LicenseInfo;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
   unreadAlertCount,
-  onOpenNewWasteModal
+  onOpenNewWasteModal,
+  license
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -77,6 +60,8 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 Zero Desperdício
               </span>
+              {/* Badge da Licença */}
+              {license && <LicenseBadge license={license} />}
             </div>
             <p className="text-xs text-slate-400 hidden sm:block">
               Gestão, Prevenção do Desperdício Alimentar & HACCP

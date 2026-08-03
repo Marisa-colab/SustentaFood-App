@@ -1,14 +1,19 @@
-export type LicenseStatus = 'active' | 'expiring_soon' | 'expired';
+// --- LICENÇA ---
+export type LicenseStatus = 'active' | 'expired' | 'suspended' | 'trial';
 
 export interface LicenseInfo {
-  clientName: string;         // Nome da empresa / cliente
-  licenseKey: string;         // Código único da licença
-  startDate: string;          // Data de início (YYYY-MM-DD)
-  endDate: string;            // Data de termo (YYYY-MM-DD)
-  planType: 'Restauração' | 'Supermercado' | 'Enterprise';
+  clientName: string;
+  licenseKey?: string;
+  startDate?: string;
+  endDate?: string;
+  validUntil?: string;
+  status?: string;
+  planType?: 'Restauração' | 'Supermercado' | 'Enterprise' | string;
+  licenseType?: string;
   maxUsers?: number;
 }
 
+// --- TIPOS DE DESPERDÍCIO ---
 export type WasteCategory =
   | 'Carne'
   | 'Peixe'
@@ -18,106 +23,60 @@ export type WasteCategory =
   | 'Padaria'
   | 'Refeições Confecionadas'
   | 'Outros';
-
-export type WasteType =
-  | 'Sobras de refeições'
-  | 'Produtos fora de prazo'
-  | 'Restos de preparação'
-  | 'Alimentos devolvidos'
-  | 'Avaria / Falha de frio'
-  | 'Outro';
-
-export type ProductionLocation =
- // 🏬 Locais que cobrem tanto Restaurante como Supermercado
-export type LocationType =
-  | 'Armazém / Câmara Fria'
-  | 'Talho / Peixaria'
-  | 'Charcutaria / Lacticínios'
-  | 'Prateleira / Gôndola (Loja)'
-  | 'Padaria / Pastelaria'
-  | 'Cozinha Central / Take-Away'
-  | 'Empratamento / Buffet'
-  | 'Sala de Refeições / Bar';
-
+    
 export interface WasteLog {
   id: string;
   item: string;
-  category: WasteCategory;
-  type: WasteType;
+  category: WasteCategory | string;
+  type: string;
   quantity: number;
-  unit: 'kg' | 'L' | 'un';
-  
-  // ─── CAMPOS FINANCEIROS (Essenciais para Supermercado) ───
-  supplier?: string;              // Nome do Fornecedor (ex: Lactogal)
-  costPerUnit: number;            // Preço Pago ao Fornecedor (€)
-  salePricePerUnit?: number;      // Preço de Venda ao Público / PVP (€)
-  totalCost: number;              // Perda em Custo (€)
-  totalPotentialRevenue?: number; // Faturação Perdida (€)
-  // ─────────────────────────────────────────────────────────
-
+  unit: string;
+  supplier?: string;
+  costPerUnit: number;
+  salePricePerUnit?: number;
+  totalCost: number;
+  totalPotentialRevenue?: number;
   date: string;
   time: string;
-  location: LocationType;         // Usa a localização universal
+  location: string; // Permite qualquer localização sem dar erro de TypeScript
   responsible: string;
   notes?: string;
   co2eKg: number;
 }
 
-export interface SummaryMetrics {
-  totalWasteKgToday: number;
-  totalWasteKgMonth: number;
-  totalCostLostMonth: number;
-  totalRevenueLostMonth?: number; 
-  totalCo2eKgMonth: number;
-  potentialSavingsMonth: number;
-  
-  // Métricas flexíveis:
-  mealsServedMonth?: number;      // Para Restaurante (N.º de Refeições)
-  customersServedMonth?: number;  // Para Supermercado (N.º de Clientes / Passagens na Caixa)
-  
-  kgPerMeal?: number;
-  kgPerCustomer?: number;
-  kgPerDayAvg: number;
-  reductionGoalPercent: number;
-  currentReductionPercent: number;
-}
-
+// --- STOCK & FEFO ---
 export interface StockItem {
   id: string;
   code: string;
   name: string;
-  category: WasteCategory;
+  category: string;
   quantity: number;
-  unit: 'kg' | 'L' | 'un';
+  unit: string;
   batchNumber: string;
   expiryDate: string;
-  
-  // ─── CAMPOS FINANCEIROS DE STOCK ───
-  supplier?: string;              // Nome do Fornecedor
-  costPerUnit: number;            // Preço Pago ao Fornecedor (€)
-  salePricePerUnit?: number;      // Preço de Venda Previsto (€)
-  // ───────────────────────────────────
-
-  storageType: 'Refrigerado' | 'Congelado' | 'Seco / Ambiente';
+  costPerUnit: number;
+  storageType: string;
   minStockThreshold: number;
   fefoPriority: 'Crítico' | 'Atenção' | 'Normal';
+  supplier: string;
 }
 
 export interface StockMovement {
   id: string;
   stockItemId: string;
   itemName: string;
-  type: 'Entrada' | 'Saída' | 'Ajuste / Inventário' | 'Quebra / Desperdício';
+  type: 'Entrada' | 'Saída' | 'Ajuste / Inventário';
   quantity: number;
   unit: string;
   date: string;
   responsible: string;
-  reason?: string;
+  reason: string;
 }
 
+// --- DOAÇÕES & VALORIZAÇÃO ---
 export interface DonationItem {
   name: string;
-  category: WasteCategory;
+  category: string;
   quantity: number;
   unit: string;
   estimatedValue: number;
@@ -133,22 +92,23 @@ export interface DonationLog {
   totalKg: number;
   totalValue: number;
   responsible: string;
-  status: 'Pendente' | 'Concluída' | 'Em Trânsito';
+  status: string;
   certificateCode: string;
-  receiptNotes?: string;
+  receiptNotes: string;
 }
 
 export interface ValorizationLog {
   id: string;
-  destination: 'Compostagem' | 'Alimentação Animal' | 'Biogás / Bioenergia' | 'Reciclagem de Óleos (OAU)' | 'Outro';
+  destination: string;
   quantityKg: number;
   date: string;
   partnerEntity: string;
   co2SavedKg: number;
   responsible: string;
-  notes?: string;
+  notes: string;
 }
 
+// --- HACCP & ALERTAS ---
 export interface HaccpLog {
   id: string;
   date: string;
@@ -157,51 +117,29 @@ export interface HaccpLog {
   batchNumber: string;
   supplier: string;
   quantityKg: number;
-  rejectionReason:
-    | 'Quebra de Temperatura'
-    | 'Prazo Excedido'
-    | 'Embalagem Danificada'
-    | 'Anomalia Organoléptica'
-    | 'Contaminação Cruzada'
-    | 'Outro';
+  rejectionReason: string;
   temperatureLogged?: number;
   nonConformityCode: string;
   correctiveAction: string;
-  status: 'Aberto' | 'Ação Executada' | 'Encerrado / Auditado';
+  status: string;
   responsible: string;
 }
 
 export interface AlertItem {
   id: string;
-  type: 'expiring_soon' | 'waste_threshold' | 'excess_purchase' | 'haccp_risk' | 'anomaly';
-  severity: 'high' | 'medium' | 'info';
+  type: 'expiring_soon' | 'waste_threshold' | 'excess_purchase';
+  severity: 'high' | 'medium' | 'low';
   title: string;
   message: string;
   date: string;
   read: boolean;
-  relatedCategory?: WasteCategory;
+  relatedCategory: string;
 }
 
 export interface AIInsight {
   id: string;
-  date: string;
   title: string;
-  summary: string;
-  type: 'forecast' | 'procurement' | 'waste_risk' | 'trend';
-  metricText?: string;
-  recommendation: string;
-}
-
-export interface SummaryMetrics {
-  totalWasteKgToday: number;
-  totalWasteKgMonth: number;
-  totalCostLostMonth: number;
-  totalRevenueLostMonth?: number; // Total da receita de venda perdida no mês
-  totalCo2eKgMonth: number;
-  potentialSavingsMonth: number;
-  mealsServedMonth: number;
-  kgPerMeal: number;
-  kgPerDayAvg: number;
-  reductionGoalPercent: number;
-  currentReductionPercent: number;
+  description: string;
+  impact: string;
+  actionableStep: string;
 }
