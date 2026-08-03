@@ -10,7 +10,22 @@ export interface LicenseInfo {
   status?: string;
   planType?: 'Restauração' | 'Supermercado' | 'Enterprise' | string;
   licenseType?: string;
-  maxUsers?: number;
+  licenseKey?: string;
+  isActive: boolean;
+}
+
+export interface Compra {
+  id: string;
+  fornecedor: string;
+  produto: string;
+  quantidade: number;
+  preco: number;
+  validade: string; // YYYY-MM-DD
+  dataCompra: string;
+}
+
+export interface LoteStock extends Compra {
+  quantidadeRestante: number;
 }
 
 // --- TIPOS DE DESPERDÍCIO ---
