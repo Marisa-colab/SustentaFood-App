@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LicenseInfo } from '../tipos';
+import { LicenseInfo } from '../types';
 import { ShieldCheck, ShieldAlert, UserX, UserCheck, Calendar, Lock, Unlock, Search } from 'lucide-react';
 
 interface AdminBackofficeViewProps {
