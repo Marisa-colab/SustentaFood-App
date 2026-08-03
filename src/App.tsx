@@ -447,6 +447,11 @@ export function App() {
                 onDeleteLog={handleDeleteWasteLog}
               />
             )}
+            
+            {activeTab === 'entradas' && (
+            <EntradaMercadoriaView 
+              />
+          )}
 
             {activeTab === 'economic' && (
               <EconomicAnalysisView
