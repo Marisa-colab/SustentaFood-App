@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
 import { LoginView } from './components/LoginView';
-
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
 import { WasteLogView } from './components/WasteLogView';
