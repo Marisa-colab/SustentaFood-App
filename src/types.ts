@@ -143,3 +143,29 @@ export interface AIInsight {
   impact: string;
   actionableStep: string;
 }
+
+// --- Gestão de Licenças (Backoffice) ---
+export interface LicencaCliente {
+  id: string;
+  nomeCliente: string;
+  emailCliente: string;
+  dataInicio: string;  // Formato: "YYYY-MM-DD"
+  dataTermo: string;   // Formato: "YYYY-MM-DD"
+  tipoPlano: 'Básico' | 'Pro' | 'Empresarial';
+  estaAtivo: boolean;  // Autorização manual dada pelo vendedor
+}
+
+// --- Compras e Stock FEFO ---
+export interface Compra {
+  id: string;
+  fornecedor: string;
+  produto: string;
+  quantidade: number;
+  preco: number;
+  validade: string;    // Formato: "YYYY-MM-DD"
+  dataCompra: string;
+}
+
+export interface LoteStock extends Compra {
+  quantidadeRestante: number;
+}
