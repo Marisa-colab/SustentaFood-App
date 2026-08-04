@@ -205,6 +205,19 @@ export const StockFefoView: React.FC<StockFefoViewProps> = ({
       if (file.type === 'application/pdf') {
         // pdfjs-dist
         const pdfjsLib = await import('pdfjs-dist/build/pdf');
+        // Garantir worker do pdfjs (fallback para CDN se necessário)
+        try {
+          // @ts-ignore
+          if (pdfjsLib && pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            // @ts-ignore
+            const version = pdfjsLib.version || 'latest';
+            // @ts-ignore
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${version}/build/pdf.worker.min.js`;
+          }
+        } catch (e) {
+          // se falhar, não bloqueia; apenas log para debug
+          console.warn('Não foi possível configurar pdfjs workerSrc automaticamente:', e);
+        }
         // worker src might need setting depending on bundler; we use default if packaging provides it.
         // carregar o PDF como array buffer
         const arrayBuffer = await file.arrayBuffer();
